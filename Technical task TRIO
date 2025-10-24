@@ -1,0 +1,55 @@
+ТЕХНИЧЕСКОЕ ЗАДАНИЕ (ТЗ) ДЛЯ ИСПОЛНИТЕЛЯ — v1 + SOL
+
+100% ГОТОВО К РЕАЛИЗАЦИИ (Pine / Python / Bot)yaml
+
+# ТЗ: ML-PolyTrend-Triple v1 — BTC + ETH + SOL
+
+## ДАННЫЕ
+- Активы: BTCUSDT, ETHUSDT, SOLUSDT
+- Таймфрейм: 15m
+- Период: 2025 (полный год)
+
+## ИНДИКАТОРЫ (на закрытии свечи)
+- change_pct = (Close - Open) / Open * 100
+- ADX(14)
+- SuperTrend(10, 3.0)
+- SMA10, SMA30
+- ATR(14) — для динамического риска
+
+## ML-ПРОГНОЗ
+- XGBoost, признаки: change_pct, ADX, SuperTrend, SMA, RSI(14), MACD, Volume_norm, 3 лага
+- Порог: ≥ 0.67
+
+## УСЛОВИЯ ВХОДА (независимо на каждом активе)
+IF:
+  ML_prob >= 0.67
+  AND |change_pct| >= (0.22% BTC / 0.24% ETH / 0.35% SOL)
+  AND ADX(14) >= (26 BTC / 27 ETH / 28 SOL)
+  AND SuperTrend(10, 3.0) == UP
+  AND SMA10 > SMA30
+  AND time >= 07:00 AND time < 23:00 UTC
+  AND not (1 янв or 25 дек or day in [1,2,3])
+THEN: Вход на следующей свече
+
+## РИСК-МЕНЕДЖМЕНТ
+def get_dynamic_risk(close, atr):
+    target_vol = 0.25
+    current_vol = (atr / close) * 100
+    risk = 1.5 * (target_vol / current_vol)
+    return max(1.0, min(2.0, risk))
+- Ставка = баланс * get_dynamic_risk(Close, ATR(14)) / 100
+- На каждый актив отдельно (до 6.0% при совпадении)
+
+## ПРОГРЕССИЯ
+- MAX_WINS = 5
+- После выигрыша: обновить risk_pct и продолжить
+- После проигрыша: прервать серию
+
+## PAYOUT
+- Выигрыш: bet * (49 / 51)
+- Проигрыш: -bet
+
+## МОНИТОРИНГ
+- Сигналы: Telegram / TradingView
+- Авто-стоп: Max DD > 20%
+- Логи: PnL, риск, баланс
