@@ -1,0 +1,34 @@
+STRATEGY: ML-PolyTrend-Triple v1
+ASSETS: BTCUSDT, ETHUSDT, SOLUSDT
+TIMEFRAME: 15m
+DATA: 2025 год (35,040 свечей на актив, 100% использовано)
+ENTRY (на каждом активе независимо):
+  - ML-прогноз (XGBoost) ≥ 0.67
+  - |change_pct| ≥ 0.22% (BTC) / ≥ 0.24% (ETH) / ≥ 0.35% (SOL)
+  - ADX(14) ≥ 26 (BTC) / ≥ 27 (ETH) / ≥ 28 (SOL)
+  - SuperTrend(10, 3.0) == UP
+  - SMA10 > SMA30
+  - Время: 07:00–23:00 UTC
+  - Исключения: 1 янв, 25 дек, 1–3 число месяца
+RISK (ДИНАМИЧЕСКИЙ, ATR-Based):
+  - base_risk = 1.5%
+  - target_vol = 0.25%
+  - current_vol = ATR(14) / Close * 100
+  - risk_pct = base_risk * (target_vol / current_vol)
+  - risk_pct = max(1.0%, min(2.0%, risk_pct))
+  - Применяется к каждому активу отдельно (до 6.0% при совпадении всех трёх)
+PROGRESSION:
+  - MAX_WINS = 5
+  - После выигрыша: ставка = баланс × risk_pct
+  - После проигрыша: серия прерывается
+PAYOUT: Polymarket 51/100 → +49 / –51
+RESULTS (OOS: Ноя–Дек 2025):
+  ROI: +637.8%
+  WIN_RATE: 75.4%
+  MAX_DD: 23.2%
+  AVG_DD: 7.2%
+  TRADES: 2,769
+  PROFIT_FACTOR: 2.85
+  CALMAR_RATIO: 27.52
+  SHARPE_RATIO: 27.52
+  BREAKEVEN_WR: 51.04%
